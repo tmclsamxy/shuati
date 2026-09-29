@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>刷题记忆 · 应知应会</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================= 登录 ================= -->
+<div class="login-wrap on" id="loginWrap">
+  <div class="card login-card">
+    <div class="logo-lg">📚</div>
+    <h1>刷题记忆</h1>
+    <div class="sub" id="loginSub">B 班应知应会 · 智能刷题系统</div>
+
+    <div class="login-tabs">
+      <button class="active" data-ltab="login">登录</button>
+      <button data-ltab="reg">注册</button>
+    </div>
+
+    <!-- 登录：用户名 + 密码 -->
+    <form id="loginForm" autocomplete="off">
+      <label class="fld"><span>用户名</span>
+        <input class="input" id="lgUser" placeholder="请输入用户名" autocomplete="username" required>
+      </label>
+      <label class="fld"><span>密码</span>
+        <input class="input" id="lgPass" type="password" placeholder="请输入密码" autocomplete="current-password" required>
+      </label>
+      <button class="btn btn-primary btn-lg" style="width:100%" type="submit">登 录</button>
+    </form>
+
+    <!-- 注册：用户名 + 密码 -->
+    <form id="regForm" style="display:none" autocomplete="off">
+      <label class="fld"><span>用户名 <span class="muted" style="font-weight:400">（2-20 位，中文/字母/数字/下划线）</span></span>
+        <input class="input" id="rgUser" placeholder="请输入用户名" autocomplete="username" maxlength="20" required>
+      </label>
+      <label class="fld"><span>设置密码 <span class="muted" style="font-weight:400">（至少 6 位）</span></span>
+        <input class="input" id="rgPass" type="password" placeholder="请输入密码" autocomplete="new-password" required>
+      </label>
+      <label class="fld"><span>显示昵称 <span class="muted" style="font-weight:400">（可选）</span></span>
+        <input class="input" id="rgNick" placeholder="如：任雯柽" maxlength="20">
+      </label>
+      <button class="btn btn-primary btn-lg" style="width:100%" type="submit">注 册</button>
+      <div class="login-links">
+        <button type="button" class="linkbtn" data-ltab2="login">已有账号，去登录</button>
+      </div>
+    </form>
+
+    <div class="login-foot">
+      <div class="login-author">
+        <span class="by">Designed &amp; Developed by</span>
+        <span class="who">任雯柽</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 主应用 ================= -->
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">📚</div><span class="t">刷题记忆</span></div>
+    <nav class="nav" id="nav">
+      <button data-page="practice" class="active">刷题</button>
+      <button data-page="wrong">错题本</button>
+      <button data-page="fav">收藏</button>
+      <button data-page="flash">卡片背诵</button>
+      <button data-page="dictation">填空默写</button>
+      <button data-page="overview">速览</button>
+      <button data-page="bank">题库</button>
+      <button data-page="stats">统计</button>
+      <button data-page="admin" id="navAdmin" style="display:none">管理</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="streak-pill" id="streakPill" title="连续打卡天数">🔥 <span id="streakNum">0</span></div>
+      <button class="icon-btn" id="themeBtn" title="切换主题">🌙</button>
+      <button class="avatar" id="avatarBtn" title="账号">A</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ---------- 刷题 ---------- -->
+    <section class="page on" id="page-practice">
+      <div class="page-head">
+        <h2>刷题练习</h2>
+        <div class="sub" id="practiceSub">顺序练习</div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm" id="btnRestart">重新开始</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="card stat"><div class="k">本次已答</div><div class="v" id="sDone">0</div><div class="d" id="sTotal">共 138 题</div></div>
+        <div class="card stat"><div class="k">本次正确率</div><div class="v" id="sAcc">—</div><div class="d" id="sRight">正确 0 题</div></div>
+        <div class="card stat"><div class="k">用时</div><div class="v" id="sTime">00:00</div><div class="d">本场计时</div></div>
+        <div class="card stat"><div class="k">待复习</div><div class="v" id="sDue">0</div><div class="d">间隔重复到期</div></div>
+      </div>
+
+      <div class="practice-top">
+        <div class="seg" id="modeSeg">
+          <button data-mode="seq" class="active">顺序</button>
+          <button data-mode="rand">随机</button>
+          <button data-mode="tag">按标签</button>
+          <button data-mode="wrong">错题</button>
+          <button data-mode="fav">收藏</button>
+          <button data-mode="due">待复习</button>
+        </div>
+        <select class="select hide-sm" id="tagSelect" style="width:auto;display:none"></select>
+        <div class="progress-bar"><i id="pBar" style="width:0%"></i></div>
+        <span class="muted" id="pText" style="font-variant-numeric:tabular-nums">0 / 0</span>
+      </div>
+
+      <div id="qArea"></div>
+    </section>
+
+    <!-- ---------- 错题本 ---------- -->
+    <section class="page" id="page-wrong">
+      <div class="page-head">
+        <h2>错题本</h2><div class="sub" id="wrongSub">重练答对 2 次自动移出</div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-primary" id="btnRedoWrong">开始重练</button>
+        <button class="btn btn-sm btn-danger" id="btnClearWrong">清空</button>
+      </div>
+      <div class="q-list" id="wrongList"></div>
+    </section>
+
+    <!-- ---------- 收藏 ---------- -->
+    <section class="page" id="page-fav">
+      <div class="page-head">
+        <h2>我的收藏</h2><div class="sub" id="favSub">共 0 题</div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-primary" id="btnPracticeFav">开始练习</button>
+      </div>
+      <div class="q-list" id="favList"></div>
+    </section>
+
+    <!-- ---------- 卡片背诵 ---------- -->
+    <section class="page" id="page-flash">
+      <div class="page-head"><h2>卡片翻转背诵</h2><div class="sub">点击卡片翻面，先自测再揭晓</div><div class="spacer"></div>
+        <select class="select" id="flashTag" style="width:auto"></select>
+      </div>
+      <div class="flip-scene">
+        <div class="flip-card" id="flipCard">
+          <div class="flip-face front">
+            <div class="role">知识点 / 问题</div>
+            <div class="content" id="flashFront">—</div>
+            <div class="hint">点击卡片翻面查看答案</div>
+          </div>
+          <div class="flip-face back">
+            <div class="role">答案 / 解析</div>
+            <div class="content" id="flashBack">—</div>
+            <div class="hint">再次点击返回正面</div>
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="justify-content:center;max-width:620px;margin:0 auto">
+        <button class="btn" id="flashPrev">← 上一张</button>
+        <span class="muted" id="flashPos" style="min-width:80px;text-align:center;font-variant-numeric:tabular-nums">0 / 0</span>
+        <button class="btn" id="flashShuffle">🔀 打乱</button>
+        <button class="btn" id="flashNext">下一张 →</button>
+      </div>
+      <div class="actions" style="justify-content:center;max-width:620px;margin:14px auto 0">
+        <button class="btn btn-sm" id="flashKnow">✅ 记住了</button>
+        <button class="btn btn-sm" id="flashDunno">❌ 不熟，稍后再看</button>
+      </div>
+    </section>
+
+    <!-- ---------- 填空默写 ---------- -->
+    <section class="page" id="page-dictation">
+      <div class="page-head"><h2>填空默写</h2><div class="sub">先自己写，再对答案</div><div class="spacer"></div>
+        <select class="select" id="dictTag" style="width:auto"></select>
+        <button class="btn btn-sm" id="dictRevealAll">显示全部答案</button>
+      </div>
+      <div id="dictArea" class="q-list"></div>
+    </section>
+
+    <!-- ---------- 知识点速览 ---------- -->
+    <section class="page" id="page-overview">
+      <div class="page-head"><h2>知识点速览</h2><div class="sub">考前 10 分钟快速过一遍</div><div class="spacer"></div>
+        <input class="input" id="ovSearch" placeholder="搜索知识点…" style="width:200px">
+      </div>
+      <div class="kb-grid" id="kbGrid"></div>
+    </section>
+
+    <!-- ---------- 题库管理 ---------- -->
+    <section class="page" id="page-bank">
+      <div class="page-head">
+        <h2>题库管理</h2><div class="sub" id="bankSub">共 0 题</div>
+        <div class="spacer"></div>
+        <button class="btn btn-sm" id="btnImport">📥 导入文档</button>
+        <button class="btn btn-sm" id="btnAddQ">＋ 添加题目</button>
+      </div>
+      <div class="list-tools">
+        <input class="input" id="bankSearch" placeholder="🔍 搜索题干 / 答案 / 标签…">
+        <select class="select" id="bankTag" style="width:auto"></select>
+        <select class="select" id="bankType" style="width:auto">
+          <option value="">全部题型</option>
+          <option value="single">单选</option><option value="multi">多选</option>
+          <option value="judge">判断</option><option value="fill">填空</option>
+        </select>
+        <button class="btn" id="btnExportJson">导出 JSON</button>
+        <button class="btn" id="btnExportCsv">导出 CSV</button>
+      </div>
+      <div class="q-list" id="bankList"></div>
+      <div class="actions" style="justify-content:center;padding:16px 0">
+        <button class="btn" id="bankMore" style="display:none">加载更多</button>
+      </div>
+    </section>
+
+    <!-- ---------- 统计 ---------- -->
+    <section class="page" id="page-stats">
+      <div class="page-head"><h2>学习统计</h2><div class="sub">数据实时更新</div></div>
+      <div class="stat-grid">
+        <div class="card stat"><div class="k">总答题次数</div><div class="v" id="stTotal">0</div></div>
+        <div class="card stat"><div class="k">总正确率</div><div class="v" id="stAcc">—</div></div>
+        <div class="card stat"><div class="k">已练习题目</div><div class="v" id="stSeen">0</div><div class="d" id="stSeenD">/ 138 题</div></div>
+        <div class="card stat"><div class="k">题目掌握度</div><div class="v" id="stMaster">—</div><div class="d">已见题平均掌握</div></div>
+        <div class="card stat"><div class="k">连续打卡</div><div class="v" id="stStreak">0 <small>天</small></div><div class="d" id="stStreakD">最长 0 天</div></div>
+        <div class="card stat"><div class="k">累计学习</div><div class="v" id="stMin">0 <small>分</small></div><div class="d">总计时长</div></div>
+      </div>
+
+      <div class="card" style="padding:18px;margin-bottom:16px">
+        <div class="chart-h"><h3>每日学习曲线</h3><span class="muted">近 14 天答题量</span></div>
+        <div class="chart-box"><canvas id="cvDaily" width="1000" height="230" style="width:100%;height:230px"></canvas></div>
+      </div>
+
+      <div class="card" style="padding:18px;margin-bottom:16px">
+        <div class="chart-h"><h3>掌握度分布</h3><span class="muted">基于答题正确率与遗忘曲线</span></div>
+        <div id="masterDist"></div>
+      </div>
+
+      <div class="card" style="padding:18px">
+        <div class="chart-h"><h3>各知识点正确率</h3><span class="muted">答对数 / 作答数</span></div>
+        <div id="tagAcc"></div>
+      </div>
+    </section>
+
+    <!-- ---------- 管理员 ---------- -->
+    <section class="page" id="page-admin">
+      <div class="page-head"><h2>用户与权限管理</h2><div class="sub">仅管理员可见</div><div class="spacer"></div>
+        <button class="btn btn-sm" id="btnBackup">💾 备份题库</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>用户</th><th>角色</th><th>权限</th><th>作答情况</th><th>注册时间</th><th>操作</th></tr></thead>
+          <tbody id="userTbody"></tbody>
+        </table>
+      </div>
+      <div class="card" style="padding:16px;margin-top:16px">
+        <h3 style="margin:0 0 10px;font-size:15px">权限说明</h3>
+        <div class="muted" style="line-height:1.9;font-size:13.5px">
+          <b>刷题</b>：练习、错题、收藏、背诵、默写、速览 · 
+          <b>题库编辑</b>：增删改题目、导入文档 · 
+          <b>导出数据</b>：导出 JSON / CSV · 
+          <b>用户管理</b>：查看全部用户、分配角色与权限（仅管理员）
+        </div>
+        <p class="muted" style="margin:12px 0 0;font-size:12.5px">
+          说明：出于安全考虑，管理员无法代改他人密码。如需重置，请联系服务器管理员直接操作数据库
+          （server/data/quiz.sqlite 的 users 表）。
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-foot">
+    <span>刷题记忆 · 应知应会</span>
+    <span class="dot">·</span>
+    <span>Designed &amp; Developed by <b>任雯柽</b></span>
+  </footer>
+</div>
+
+<!-- ================= 模态框 ================= -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modalBox">
+    <div class="modal-hd"><h3 id="modalTitle">标题</h3><button class="x" id="modalX">✕</button></div>
+    <div class="modal-bd" id="modalBody"></div>
+    <div class="modal-ft" id="modalFoot"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="config.js"></script>
+<script src="seed-data.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

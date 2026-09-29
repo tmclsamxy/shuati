@@ -1,0 +1,64 @@
+# =========================================================
+# 刷题记忆 · Docker Compose（1Panel 可直接识别）
+# ---------------------------------------------------------
+# 用法：
+#   1) 把整个项目目录上传到服务器，例如 /mrcheng/shuati
+#   2) 【重要】修好数据目录属主，否则 SQLite 会报
+#      「unable to open database file」：
+#        mkdir -p server/data
+#        sudo chown -R 1000:1000 server/data
+#   3) 在该目录执行：docker compose up -d --build
+#   4) 首次部署需要导入题库：
+#        docker compose exec quiz node server/scripts/seed.js
+#   5) 在 1Panel 里为 3300 端口配置反向代理 + HTTPS 证书
+#
+# 目录结构约定（与仓库一致）：
+#   /mrcheng/shuati/
+#     ├── index.html  app.js  store.js  config.js  styles.css  seed-data.js
+#     ├── docker-compose.yml
+#     └── server/  (Dockerfile 所在)
+# =========================================================
+services:
+  quiz:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: quiz-memory:latest
+    container_name: quiz-memory
+    restart: unless-stopped
+
+    ports:
+      # 只监听回环地址，外部流量一律经由 1Panel 反向代理进入。
+      # 宿主机端口用 3300（3000 常被 1Panel 自身或其他服务占用）。
+      # 容器内部仍监听 3000，只改宿主映射。
+      - "127.0.0.1:3300:3000"
+
+    environment:
+      TZ: Asia/Shanghai
+      PORT: "3000"
+      DB_PATH: /app/server/data/quiz.sqlite
+      STATIC_DIR: /app/web
+      SESSION_DAYS: "30"
+      # 容器内运行服务的 uid/gid。需与宿主机 server/data 的属主一致。
+      # 若你用的是别的用户，改成对应值；查当前用户：id -u / id -g
+      PUID: "1000"
+      PGID: "1000"
+
+    # 前端静态文件与数据目录从宿主机挂载
+    volumes:
+      # 前端：只读挂载，避免容器内误改宿主文件。
+      # 注意：整个项目根（含 server/）都挂到 /app/web，
+      # 这样 seed-data.js 在容器内是 /app/web/seed-data.js，
+      # 与 Dockerfile 里的 STATIC_DIR=/app/web 一致。
+      # 只读(:ro)可防止容器误写宿主代码；SQLite 数据在下面的独立挂载里，不受影响。
+      - ./:/app/web:ro
+      # 数据：SQLite 文件持久化，容器重建不丢数据。
+      # ⚠️ 此目录的宿主机属主必须与上面的 PUID/PGID 一致，否则无法写入。
+      - ./server/data:/app/server/data
+
+    # 日志轮转，避免长期运行占满磁盘
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
