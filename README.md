@@ -177,16 +177,16 @@ docker compose ps
 docker compose logs -f --tail=50
 ```
 
-服务只监听 `127.0.0.1:3000`，外部必须经反向代理访问。
+服务只监听 `127.0.0.1:3300`，外部必须经反向代理访问。
 
 **⑥ 配置反向代理与 HTTPS**
 
 1Panel → 「网站 → 反向代理」：
 - **主域名**：填你的域名，如 `quiz.example.com`
-- **代理地址**：`http://127.0.0.1:3000`
+- **代理地址**：`http://127.0.0.1:3300`
 - 保存后，在「HTTPS」里申请 Let's Encrypt 证书并开启强制跳转
 
-> 若 1Panel 的反向代理跑在 Docker 网络里，把 compose 里的端口映射改成 `"3000:3000"`，代理地址填 `http://quiz-memory:3000`。
+> 若 1Panel 的反向代理跑在 Docker 网络里，把 compose 里的端口映射改成 `"3300:3000"`，代理地址填 `http://quiz-memory:3300`。
 
 ---
 
